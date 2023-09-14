@@ -1,0 +1,86 @@
+import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.stage.Stage;
+
+public class TaskTrackerGUI extends Application {
+    private TaskTracker taskTracker = new TaskTracker();
+    private ListView<String> taskListView;
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+
+    @Override
+    public void start(Stage primaryStage) {
+        primaryStage.setTitle("Task Tracker");
+
+        // Create a VBox layout for the main window
+        VBox vbox = new VBox(10);
+        vbox.setPadding(new Insets(10));
+
+        // Create a ListView to display tasks
+        taskListView = new ListView<>();
+        taskListView.setPrefHeight(300);
+
+        // Create buttons for adding, marking, and listing tasks
+        Button addButton = new Button("Add Task");
+        Button markButton = new Button("Mark as Completed");
+        Button listButton = new Button("List Tasks");
+
+        // Text fields for task details
+        TextField titleField = new TextField();
+        titleField.setPromptText("Title");
+        TextField descriptionField = new TextField();
+        descriptionField.setPromptText("Description");
+        TextField dueDateField = new TextField();
+        dueDateField.setPromptText("Due Date");
+
+        // Event handler for the Add Task button
+        addButton.setOnAction(e -> {
+            String title = titleField.getText();
+            String description = descriptionField.getText();
+            String dueDate = dueDateField.getText();
+
+            if (!title.isEmpty() && !description.isEmpty() && !dueDate.isEmpty()) {
+                Task task = new Task(title, description, dueDate);
+                taskTracker.addTask(task);
+                titleField.clear();
+                descriptionField.clear();
+                dueDateField.clear();
+            }
+        });
+
+        // Event handler for the Mark as Completed button
+        markButton.setOnAction(e -> {
+            int selectedIndex = taskListView.getSelectionModel().getSelectedIndex();
+            if (selectedIndex >= 0) {
+                taskTracker.markTaskAsCompleted(selectedIndex);
+                updateTaskListView();
+            }
+        });
+
+        // Event handler for the List Tasks button
+        listButton.setOnAction(e -> updateTaskListView());
+
+        // Add components to the layout
+        vbox.getChildren().addAll(
+                titleField, descriptionField, dueDateField,
+                addButton, markButton, listButton,
+                taskListView
+        );
+
+        Scene scene = new Scene(vbox, 400, 400);
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+
+    private void updateTaskListView() {
+        taskListView.getItems().clear();
+        for (Task task : taskTracker.getTasks()) {
+            taskListView.getItems().add(task.toString());
+        }
+    }
+}
